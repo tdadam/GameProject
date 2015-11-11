@@ -1,7 +1,15 @@
 /**
  * Created by tdadam on 11/11/15.
  */
-var canvas, renderingContext, width, height, sprite;
+var canvas, renderingContext, width, height, sprite,
+
+    states = {
+        Splash: 0,
+        Game: 1,
+        Score: 2
+    };
+
+
 
 function main() {
     canvasSetup();
