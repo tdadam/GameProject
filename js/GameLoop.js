@@ -8,10 +8,10 @@
 //4. GameLoop function, update function, render function
 //5. massive bird sprite function
 //6. Add onpress function since referenced
-//At this point, matches original without coral
+//At this point, matches original without ship
 //all calls and references to obstacles commented out, concentrating on animate sprite and begin game state so sprite jumps
 //Sprite drawn in update junction that refreshes constantly, to scroll animation
-    //http://uxcobra.com/js/fishGame.html
+//http://uxcobra.com/js/fishGame.html
 
 
 var
@@ -24,10 +24,10 @@ var
     frames = 0, //Counts number of frames rendered
 
 
-    duck, //playable character
-//corals,
+    mech, //playable character
+    ships,
 
-    //state vars
+//state vars
     currentState,
 
 //splash, gameplay. score
@@ -37,13 +37,13 @@ var
         Score: 2
     };
 
-function Duck() {
-    this.x = 140;
+function Mech() {
+    this.x = 90;
     this.y = 0;
 
     this.frame = 0;
     this.velocity = 0;
-    this.animation = [0, 1, 2, 1]; // The animation sequence
+    this.animation = [1, 0, 1, 2]; // The animation sequence
 
     this.rotation = 0;
     this.radius = 12;
@@ -52,14 +52,14 @@ function Duck() {
     this._jump = 4.6;
 
     /**
-     * Makes the Duck jump
+     * Makes the Mech jump
      */
     this.jump = function () {
         this.velocity = -this._jump;
     };
 
     /**
-     * Update sprite animation and position of Duck
+     * Update sprite animation and position of Mech
      */
     this.update = function () {
 // Play animation twice as fast during game state
@@ -69,28 +69,28 @@ function Duck() {
         this.frame %= this.animation.length;
 
         if (currentState === states.Splash) {
-            this.updateIdleDuck();
+            this.updateIdleMech();
         } else { // Game state
-            this.updatePlayingDuck();
+            this.updatePlayingMech();
         }
     };
 
     /**
-     * Runs the duck through its idle animation.
+     * Runs the mech through its idle animation.
      */
-    this.updateIdleDuck = function () {
-        this.y = height - 280 + 5 * Math.cos(frames / 10);
+    this.updateIdleMech = function () {
+        this.y = height - 220 + 5 * Math.cos(frames / 10);
         this.rotation = 0;
     };
 
     /**
-     * Determines duck animation for the player-controlled duck.
+     * Determines mech animation for the player-controlled mech.
      */
-    this.updatePlayingDuck = function () {
+    this.updatePlayingMech = function () {
         this.velocity += this.gravity;
         this.y += this.velocity;
 
-// Change to the score state when duck touches the ground
+// Change to the score state when mech touches the ground
         if (this.y >= height - foregroundSprite.height - 10) {
             this.y = height - foregroundSprite.height - 10;
 
@@ -101,7 +101,7 @@ function Duck() {
             this.velocity = this._jump; // Set velocity to jump speed for correct rotation
         }
 
-// When duck lacks upward momentum increment the rotation angle
+// When mech lacks upward momentum increment the rotation angle
         if (this.velocity >= this._jump) {
             this.frame = 1;
             this.rotation = Math.min(Math.PI / 2, this.rotation + 0.3);
@@ -111,7 +111,7 @@ function Duck() {
     };
 
     /**
-     * Draws Duck to canvas renderingContext
+     * Draws Mech to canvas renderingContext
      * @param {CanvasRenderingContext2D} renderingContext the context used for drawing
      */
     this.draw = function (renderingContext) {
@@ -123,23 +123,23 @@ function Duck() {
 
         var n = this.animation[this.frame];
 
-// draws the duck with center in origo
-        duckSprite[n].draw(renderingContext, -duckSprite[n].width / 2, -duckSprite[n].height / 2);
+// draws the mech with center in origo
+        mechSprite[n].draw(renderingContext, -mechSprite[n].width / 2, -mechSprite[n].height / 2);
 
         renderingContext.restore();
     };
 }
 
 function onpress(evt) {
-    switch(currentState) {
-        case state.Splash: //start the game and update the duck velocity
-            currentState = state.Game;
-            duck.jump();
+    switch (currentState) {
+        case states.Splash: //start the game and update the mech velocity
+            currentState = states.Game;
+            mech.jump();
             break;
-        case state.Game: //game in progress, update velocity
-            duck.jump();
+        case states.Game: //game in progress, update velocity
+            mech.jump();
             break;
-        case state.Score: //change from score to splash on button
+        case states.Score: //change from score to splash on button
             //getting event location
             var mouseX = evt.offsetX, mouseY = evt.offsetY;
             if (mouseX == null || mouseY == null) {
@@ -148,7 +148,7 @@ function onpress(evt) {
             }
             //check hitting the button
             if (okButton.x < mouseX && mouseX < okButton.width && okButton.y < mouseY && mouseY < okButton.height) {
-                currentState = state.Splash;
+                currentState = states.Splash;
             }
             break;
     }
@@ -165,7 +165,7 @@ function windowSetup() {
     var inputEvent = "touchstart";
     if (width >= 500) {
         width = 380;
-        height = 430;
+        height = 370;
         inputEvent = "mousedown";
     }
 
@@ -173,13 +173,7 @@ function windowSetup() {
     document.addEventListener(inputEvent, onpress);
 }
 
-function main() {
-    canvasSetup();
-    document.body.appendChild(canvas);
-    loadGraphics();
-}
-
-function canvasSetup(){
+function canvasSetup() {
     canvas = document.createElement("canvas");
     canvas.style.border = "1px solid black";
     canvas.width = width;
@@ -187,15 +181,33 @@ function canvasSetup(){
     renderingContext = canvas.getContext("2d");
 }
 
-function loadGraphics(){
+function loadGraphics() {
     var img = new Image();
-    img.src = "./images/sheet.png";
-    img.onload = function() {
+    img.src = "./images/mySprites.png";
+    img.onload = function () {
         initSprites(this);
-        renderingContext.fillStyle = backgroundSprite.color;
-        renderingContext.fillRect(0, 0, 300, 500);
+        //renderingContext.fillStyle = backgroundSprite.color;
+
+
+        okButton = {
+            x: (width - okButtonSprite.width) / 2,
+            y: height - 200,
+            width: okButtonSprite.width,
+            height: okButtonSprite.height
+        };
+        gameLoop();
     };
-    gameLoop();
+
+}
+
+function main() {
+    windowSetup();
+    canvasSetup();
+    currentState = states.Splash;
+    document.body.appendChild(canvas);
+    mech = new Mech();
+    //ships = new ShipCollection();
+    loadGraphics();
 }
 
 function gameLoop() {
@@ -205,20 +217,20 @@ function gameLoop() {
 }
 
 /**
- * Updates all moving sprites: foreground, fish, and corals
+ * Updates all moving sprites: foreground, fish, and ships
  */
 function update() {
     frames++;
 
     if (currentState !== states.Score) {
-        foregroundPosition = (foregroundPosition - 2) % 14; // Move left two px each frame. Wrap every 14px.
+        foregroundPosition = (foregroundPosition - 2) % 500; // Move left two px each frame. Wrap every 14px.
     }
 
     if (currentState === states.Game) {
-        //corals.update();
+        //ships.update();
     }
 
-    fish.update();
+    mech.update();
 }
 
 /**
@@ -232,8 +244,8 @@ function render() {
     backgroundSprite.draw(renderingContext, 0, height - backgroundSprite.height);
     backgroundSprite.draw(renderingContext, backgroundSprite.width, height - backgroundSprite.height);
 
-    //corals.draw(renderingContext);
-    fish.draw(renderingContext);
+    //ships.draw(renderingContext);
+    mech.draw(renderingContext);
 
     // Draw foreground sprites
     foregroundSprite.draw(renderingContext, foregroundPosition, height - foregroundSprite.height);

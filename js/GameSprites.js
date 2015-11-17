@@ -4,7 +4,7 @@
 // Sprite variables
 
 var
-    birdSprite,
+    mechSprite,
     backgroundSprite,
     foregroundSprite,
     topObstacleSprite,
@@ -24,22 +24,23 @@ function Sprite(img, x, y, width, height) {
 
 // Draw method (prototype)
 
-Sprite.prototype.draw = function(renderingContext, x, y) {
+Sprite.prototype.draw = function (renderingContext, x, y) {
     renderingContext.drawImage(this.img, this.x, this.y, this.width, this.height, x, y, this.width, this.height);
 };
 
 // initialize Sprites
 
 function initSprites(img) {
-    birdSprite = [
-        new Sprite(img, 176, 115, 42, 28),
-        new Sprite(img, 176, 144, 42, 28),
-        new Sprite(img, 176, 172, 42, 28)
+    mechSprite = [
+        new Sprite(img, 8, 5, 33, 38),
+        new Sprite(img, 8, 46, 33, 38),
+        new Sprite(img, 8, 88, 33, 38)
     ];
 
-    backgroundSprite = new Sprite(img, 0, 0, 138, 114);
-    backgroundSprite.color = "#ABE1EE";
-    foregroundSprite = new Sprite(img, 138, 0, 112, 56);
+    backgroundSprite = new Sprite(img, 0, 162, 250, 223);
+    //backgroundSprite.color = "#ABE1EE";
+    foregroundSprite = new Sprite(img, 0, 389, 250, 32);
 
-    okButtonSprite = new Sprite(img, 119, 191, 40, 14);
+    //okButtonSprite = new Sprite(img, 189, 4, 43, 44);
+    okButtonSprite = new Sprite(img, 192, 52, 37, 37);
 }
