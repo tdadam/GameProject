@@ -38,9 +38,10 @@ function initSprites(img) {
     ];
 
     backgroundSprite = new Sprite(img, 0, 162, 250, 223);
-    //backgroundSprite.color = "#ABE1EE";
     foregroundSprite = new Sprite(img, 0, 389, 250, 32);
 
     //okButtonSprite = new Sprite(img, 189, 4, 43, 44);
     okButtonSprite = new Sprite(img, 192, 52, 37, 37);
+    topObstacleSprite = new Sprite(img, 113, 0, 67, 156);
+    bottomObstacleSprite = new Sprite(img, 42, 0, 66, 156);
 }

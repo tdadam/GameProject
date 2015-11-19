@@ -35,7 +35,9 @@ var
         Splash: 0,
         Game: 1,
         Score: 2
-    };
+    },
+    start;
+
 
 function Mech() {
     this.x = 90;
@@ -69,8 +71,10 @@ function Mech() {
         this.frame %= this.animation.length;
 
         if (currentState === states.Splash) {
+            start = true;
             this.updateIdleMech();
         } else { // Game state
+            start = false;
             this.updatePlayingMech();
         }
     };
@@ -93,6 +97,16 @@ function Mech() {
 // Change to the score state when mech touches the ground
         if (this.y >= height - foregroundSprite.height - 10) {
             this.y = height - foregroundSprite.height - 10;
+
+            if (currentState === states.Game) {
+                currentState = states.Score;
+            }
+
+            this.velocity = this._jump; // Set velocity to jump speed for correct rotation
+        }
+// Change to the score state when mech touches the top
+        if (this.y <= 400 - (height)) {
+            //this.y = height - foregroundSprite.height - 10;
 
             if (currentState === states.Game) {
                 currentState = states.Score;
@@ -238,7 +252,7 @@ function update() {
  */
 function render() {
     // Draw background color
-    renderingContext.fillRect(0, 0, width, height);
+    //renderingContext.fillRect(0, 0, width, height);
 
     // Draw background sprites
     backgroundSprite.draw(renderingContext, 0, height - backgroundSprite.height);
@@ -250,4 +264,14 @@ function render() {
     // Draw foreground sprites
     foregroundSprite.draw(renderingContext, foregroundPosition, height - foregroundSprite.height);
     foregroundSprite.draw(renderingContext, foregroundPosition + foregroundSprite.width, height - foregroundSprite.height);
+    if(start){
+        renderingContext.strokeStyle = "white";
+        renderingContext.font = "40px Comic Sans MS";
+        renderingContext.strokeText("Flappy Mech", 135, 125);
+        renderingContext.font = "18px Comic Sans MS";
+        renderingContext.strokeText("Controls: Click to elevate", 135, 185);
+        renderingContext.strokeText("Goal: Avoid all obstacles", 135, 210);
+        renderingContext.font = "30px Comic Sans MS";
+        renderingContext.strokeText("Click to Start!", 135, 275);
+    }
 }
