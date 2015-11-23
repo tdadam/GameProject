@@ -23,9 +23,10 @@ var
     foregroundPosition = 0,
     frames = 0, //Counts number of frames rendered
     score = 0,
-    best = 0,
-    shipGapMin = 120,
-    shipGapMax = 145,
+    best = localStorage.getItem('best'),
+//TODO: Cookies!!!!
+    shipGapMin = 110,
+    shipGapMax = 160,
     shipGap = shipGapMax,
 
     mech, //playable character
@@ -41,6 +42,14 @@ var
         Score: 2
     };
 
+if (best !== null) {
+    if (score > best) {
+     localStorage.setItem('best', score);
+    }
+}
+else {
+    localStorage.setItem('best', score);
+}
 
 function Mech() {
     this.x = 90;
@@ -145,63 +154,78 @@ function Mech() {
     };
 }
 
-ships = {
-    _ships: [],
-    reset: function () {
+function ShipsCollection() {
+    this._ships = [];
+    this.reset = function () {
         this._ships = [];
         shipGap = shipGapMax;
-    },
-    update: function () {
+    };
+    this.add = function () {
+        this._ships.push(new Ship());
+    };
+    this.update = function () {
         if (frames % 100 === 0) {
-            var _y = height - (topObstacleSprite.height + foregroundSprite.height + 120 + 200 * Math.random());
+            //TODO: add random to adjust the frequency
             if (shipGap > shipGapMin) {
-                shipGap = shipGap - 5;
+                shipGap = shipGap - 10;
             }
-            this._ships.push({
-                gap: shipGap,
-                x: 500,
-                y: _y,
-                width: topObstacleSprite.width,
-                height: topObstacleSprite.height
-            });
+            if (shipGap <= shipGapMin) {
+                shipGap = shipGapMax;
+            }
+            this.add();
         }
         for (var i = 0, len = this._ships.length; i < len; i++) {
-            var p = this._ships[i];
-//if (i === 0) {
-            score += (p.x + topObstacleSprite.width) === mech.x ? 1 : 0;
-
-
-            var cx = Math.min(Math.max(mech.x, p.x), p.x + p.width);
-            var cy1 = Math.min(Math.max(mech.y, p.y), p.y + p.height);
-            var cy2 = Math.min(Math.max(mech.y, p.y + p.height + p.gap), p.y + 2 * p.height + p.gap);
-
-            var dx = mech.x - cx;
-            var dy1 = mech.y - cy1;
-            var dy2 = mech.y - cy2;
-
-            var d1 = dx * dx + dy1 * dy1;
-            var d2 = dx * dx + dy2 * dy2;
-            var r = mech.radius * mech.radius;
-
-            if (r > d1 || r > d2) {
-                currentState = states.Score;
+            var ship = this._ships[i];
+            if (i === 0) {
+                ship.detectCollision();
             }
-            p.x -= 2;
-            if (p.x < -p.width) {
+            score += (ship.x + topObstacleSprite.width - 10) === mech.x ? 1 : 0;
+
+            ship.x -= 2;
+            if (ship.x < -ship.width) {
                 this._ships.splice(i, 1);
                 i--;
                 len--;
             }
         }
-    },
-    draw: function(renderingContext) {
+    };
+    this.draw = function () {
         for (var i = 0, len = this._ships.length; i < len; i++) {
-            var p = this._ships[i];
-            topObstacleSprite.draw(renderingContext, p.x, p.y);
-            bottomObstacleSprite.draw(renderingContext, p.x, p.y+ p.gap+ p.height);
+            var ship = this._ships[i];
+            ship.draw();
         }
     }
-};
+}
+
+function Ship() {
+    this.gap = shipGap;
+    this.x = 500;
+    this.y = height - (topObstacleSprite.height + foregroundSprite.height + 120 + 200 * Math.random());
+    this.width = topObstacleSprite.width;
+    this.height = topObstacleSprite.height;
+
+    this.detectCollision = function () {
+        var cx = Math.min(Math.max(mech.x, this.x), this.x + this.width);
+        var cy1 = Math.min(Math.max(mech.y, this.y), this.y + this.height);
+        var cy2 = Math.min(Math.max(mech.y, this.y + this.height + this.gap), this.y + 2 * this.height + this.gap);
+
+        var dx = mech.x - cx;
+        var dy1 = mech.y - cy1;
+        var dy2 = mech.y - cy2;
+
+        var d1 = dx * dx + dy1 * dy1;
+        var d2 = dx * dx + dy2 * dy2;
+        var r = mech.radius * mech.radius;
+
+        if (r > d1 || r > d2) {
+            currentState = states.Score;
+        }
+    };
+    this.draw = function () {
+        topObstacleSprite.draw(renderingContext, this.x, this.y);
+        bottomObstacleSprite.draw(renderingContext, this.x, this.y + this.gap + this.height);
+    }
+}
 
 function onpress(evt) {
     switch (currentState) {
@@ -214,13 +238,15 @@ function onpress(evt) {
             break;
         case states.Score: //change from score to splash on button
             //getting event location
+            //TODO: find the Try Again location and set onpress
             var mouseX = evt.offsetX, mouseY = evt.offsetY;
             if (mouseX == null || mouseY == null) {
                 mouseX = evt.touches[0].clientX;
                 mouseY = evt.touches[0].clientY;
             }
             //check hitting the button
-            if (okButton.x < mouseX && mouseX < okButton.width && okButton.y < mouseY && mouseY < okButton.height) {
+            //(115, 190, 163, 45);
+            if (115 < mouseX && mouseX < 278 && 190 < mouseY && mouseY < 235) {
                 ships.reset();
                 currentState = states.Splash;
                 score = 0;
@@ -281,7 +307,7 @@ function main() {
     currentState = states.Splash;
     document.body.appendChild(canvas);
     mech = new Mech();
-    //ships = new ShipCollection();
+    ships = new ShipsCollection();
     loadGraphics();
 }
 
@@ -350,6 +376,7 @@ function splashState() {
     renderingContext.strokeText("Click to Start!", 135, 275);
 }
 function scoreState() {
+    //var tryBtn = strokeRect(120, 180, 150, 45);
     renderingContext.strokeStyle = "white";
     renderingContext.font = "40px Comic Sans MS";
     renderingContext.strokeText("Game Over", 90, 100);
@@ -357,6 +384,7 @@ function scoreState() {
     renderingContext.strokeText("Score: " + score, 155, 140);
     renderingContext.strokeText("Best: " + best, 160, 170);
     renderingContext.font = "30px Comic Sans MS";
+    renderingContext.strokeRect(115, 190, 163, 45);
     renderingContext.strokeText("Try Again?", 120, 220);
 }
 function gameScore() {
