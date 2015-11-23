@@ -22,9 +22,10 @@ var
 
     foregroundPosition = 0,
     frames = 0, //Counts number of frames rendered
-score = 0,
-    shipGapMin = 90,
-    shipGapMax = 150,
+    score = 0,
+    best = 0,
+    shipGapMin = 120,
+    shipGapMax = 145,
     shipGap = shipGapMax,
 
     mech, //playable character
@@ -38,8 +39,7 @@ score = 0,
         Splash: 0,
         Game: 1,
         Score: 2
-    },
-    start;
+    };
 
 
 function Mech() {
@@ -48,10 +48,10 @@ function Mech() {
 
     this.frame = 0;
     this.velocity = 0;
-    this.animation = [1, 0, 1, 2]; // The animation sequence
+    this.animation = [0, 1, 2, 1]; // The animation sequence
 
     this.rotation = 0;
-    this.radius = 12;
+    this.radius = 14;
 
     this.gravity = 0.25;
     this._jump = 4.6;
@@ -74,10 +74,8 @@ function Mech() {
         this.frame %= this.animation.length;
 
         if (currentState === states.Splash) {
-            start = true;
             this.updateIdleMech();
         } else { // Game state
-            start = false;
             this.updatePlayingMech();
         }
     };
@@ -120,7 +118,7 @@ function Mech() {
 
 // When mech lacks upward momentum increment the rotation angle
         if (this.velocity >= this._jump) {
-            this.frame = 1;
+            this.frame = 0;
             this.rotation = Math.min(Math.PI / 2, this.rotation + 0.3);
         } else {
             this.rotation = -0.1;
@@ -169,8 +167,9 @@ ships = {
         }
         for (var i = 0, len = this._ships.length; i < len; i++) {
             var p = this._ships[i];
+//if (i === 0) {
+            score += (p.x + topObstacleSprite.width) === mech.x ? 1 : 0;
 
-            score += p.x === mech.x ? 1 : 0;
 
             var cx = Math.min(Math.max(mech.x, p.x), p.x + p.width);
             var cy1 = Math.min(Math.max(mech.y, p.y), p.y + p.height);
@@ -222,7 +221,9 @@ function onpress(evt) {
             }
             //check hitting the button
             if (okButton.x < mouseX && mouseX < okButton.width && okButton.y < mouseY && mouseY < okButton.height) {
+                ships.reset();
                 currentState = states.Splash;
+                score = 0;
             }
             break;
     }
@@ -299,6 +300,9 @@ function update() {
     if (currentState !== states.Score) {
         foregroundPosition = (foregroundPosition - 2) % 500; // Move left two px each frame. Wrap every 14px.
     }
+    else {
+        best = Math.max(best, score);
+    }
 
     if (currentState === states.Game) {
         ships.update();
@@ -318,17 +322,21 @@ function render() {
     backgroundSprite.draw(renderingContext, 0, height - backgroundSprite.height);
     backgroundSprite.draw(renderingContext, backgroundSprite.width, height - backgroundSprite.height);
 
-    //ships.draw(renderingContext);
+    ships.draw(renderingContext);
     mech.draw(renderingContext);
 
     // Draw foreground sprites
     foregroundSprite.draw(renderingContext, foregroundPosition, height - foregroundSprite.height);
     foregroundSprite.draw(renderingContext, foregroundPosition + foregroundSprite.width, height - foregroundSprite.height);
 
-    ships.draw(renderingContext);
-
-    if (start) {
+    if (currentState === states.Splash) {
         splashState();
+    }
+    else if (currentState === states.Score) {
+        scoreState();
+    }
+    else {
+        gameScore();
     }
 }
 function splashState() {
@@ -340,4 +348,19 @@ function splashState() {
     renderingContext.strokeText("Goal: Avoid all obstacles", 135, 210);
     renderingContext.font = "30px Comic Sans MS";
     renderingContext.strokeText("Click to Start!", 135, 275);
+}
+function scoreState() {
+    renderingContext.strokeStyle = "white";
+    renderingContext.font = "40px Comic Sans MS";
+    renderingContext.strokeText("Game Over", 90, 100);
+    renderingContext.font = "18px Comic Sans MS";
+    renderingContext.strokeText("Score: " + score, 155, 140);
+    renderingContext.strokeText("Best: " + best, 160, 170);
+    renderingContext.font = "30px Comic Sans MS";
+    renderingContext.strokeText("Try Again?", 120, 220);
+}
+function gameScore() {
+    renderingContext.strokeStyle = "white";
+    renderingContext.font = "25px Comic Sans MS";
+    renderingContext.strokeText("" + score, 185, 50);
 }

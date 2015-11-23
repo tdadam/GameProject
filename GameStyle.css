@@ -8,6 +8,8 @@ canvas {
     right: 375px;
 }
 body{
+    background: url("images/gameBackground.png");
     background-size: cover;
     background-repeat: no-repeat;
+    background-color: rgb(11, 11, 11);
 }
