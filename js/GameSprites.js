@@ -42,6 +42,6 @@ function initSprites(img) {
 
     //okButtonSprite = new Sprite(img, 189, 4, 43, 44);
     okButtonSprite = new Sprite(img, 192, 52, 37, 37);
-    topObstacleSprite = new Sprite(img, 113, 0, 67, 156);
-    bottomObstacleSprite = new Sprite(img, 42, 0, 66, 156);
+    topObstacleSprite = new Sprite(img, 114, 1, 50, 152);
+    bottomObstacleSprite = new Sprite(img, 50, 1, 50, 152);
 }
