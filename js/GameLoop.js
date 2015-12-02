@@ -12,7 +12,7 @@ var
     frames = 0, //Counts number of frames rendered
     score = 0,
     best = localStorage.getItem('best'),
-    //using localStorage to retain the best score if Try Again is clicked
+    //using localStorage to retain the best score
     shipGapMin = 110,
     shipGapMax = 160,
     shipGap = shipGapMax,
